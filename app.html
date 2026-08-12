@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>LegDay — App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script src="js/app.js" defer></script>
+<style>
+  .app-wrap {
+    min-height: 100vh;
+    background: linear-gradient(170deg, #eef7fb, #f9fcfd 60%, #fff);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 0 40px; gap: 14px;
+  }
+  .back-link { cursor: pointer; font-size: 14px; color: rgba(32, 30, 29, .5); }
+  .back-link:hover { color: #0088b0; }
+  .phone {
+    position: relative; width: 390px; height: 812px;
+    border: 11px solid #1b1b1d; border-radius: 50px;
+    background: #fff; overflow: hidden;
+    box-shadow: 0 26px 70px rgba(0, 60, 80, .16);
+  }
+  .notch {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 24px; border-radius: 14px; background: #1b1b1d; z-index: 9;
+  }
+  .hov-accent:hover { border-color: #0088b0 !important; color: #0088b0; }
+  .lib-card:hover { border-color: #0088b0 !important; }
+  .set-row:hover { color: #0088b0; }
+</style>
+</head>
+<body>
+<div class="app-wrap">
+  <a class="back-link" href="index.html">← back to the website</a>
+  <div class="phone">
+    <div class="notch"></div>
+    <div id="app-root" style="position:absolute;inset:0;display:flex;flex-direction:column"></div>
+  </div>
+</div>
+</body>
+</html>

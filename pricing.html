@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pricing — LegDay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+/* — pricing page — */
+.pricing-page { max-width: 1040px; margin: 0 auto; padding: 84px 28px 110px; animation: fadeIn .3s ease; }
+
+.pricing-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
+.pricing-hero .kicker { font-size: 14px; color: var(--muted-42); }
+.pricing-hero h1 { margin: 0; font-size: 52px; line-height: 1.08; letter-spacing: -.03em; max-width: 16ch; font-weight: 400; }
+.pricing-hero .sub { font-size: 19px; line-height: 1.55; color: var(--muted-58); max-width: 50ch; }
+
+.free-banner {
+  margin-top: 44px; border-radius: 20px;
+  background: linear-gradient(160deg, #e4f3fa, #f8fcfe);
+  padding: 26px 28px; display: flex; align-items: center; gap: 24px;
+}
+.free-banner .free-copy { display: flex; flex-direction: column; gap: 6px; }
+.free-banner .free-title { font-size: 22px; }
+.free-banner .free-sub { font-size: 16px; line-height: 1.55; color: rgba(32, 30, 29, .6); max-width: 56ch; }
+.free-banner .outline-pill {
+  margin-left: auto; cursor: pointer; white-space: nowrap; font-size: 16px;
+  padding: 12px 26px; border-radius: 999px; background: #fff;
+  border: 1px solid rgba(32, 30, 29, .14); color: var(--ink);
+}
+.free-banner .outline-pill:hover { border-color: #0088b0; color: #0088b0; }
+
+.tier-grid { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+.tier-card {
+  border-radius: 20px; border: 1px solid rgba(32, 30, 29, .1); background: #fff;
+  padding: 28px 26px; display: flex; flex-direction: column; gap: 8px;
+}
+.tier-card.highlight { border-color: #0088b0; background: linear-gradient(168deg, #f4fbfd, #fff); }
+.tier-card .tier-head { display: flex; align-items: center; gap: 10px; }
+.tier-card .tier-name { font-size: 15px; color: var(--muted-45); }
+.tier-card.highlight .tier-name { color: #00657f; }
+.tier-card .tier-badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: #e2f2f8; color: #00657f; }
+.tier-card .tier-price { font-size: 40px; line-height: 1.1; }
+.tier-card .tier-price span { font-size: 16px; color: rgba(32, 30, 29, .45); }
+.tier-card .tier-blurb { font-size: 16px; line-height: 1.55; color: rgba(32, 30, 29, .6); margin-top: 4px; }
+.tier-card .tier-rule { height: 1px; background: rgba(32, 30, 29, .08); margin: 16px 0 4px; }
+.tier-card .tier-features { display: flex; flex-direction: column; gap: 9px; }
+.tier-card .tier-feature { display: flex; gap: 10px; font-size: 15px; line-height: 1.45; color: rgba(32, 30, 29, .72); }
+.tier-card .tier-feature .dot { color: #0088b0; }
+.tier-card .tier-cta {
+  margin-top: 24px; cursor: pointer; text-align: center; font-size: 16px; padding: 12px;
+  border-radius: 999px; color: #201e1d; background: #fff; border: 1px solid rgba(32, 30, 29, .16);
+}
+.tier-card .tier-cta:hover { border-color: #0088b0; color: #0088b0; }
+.tier-card.highlight .tier-cta {
+  color: #fff; background: linear-gradient(140deg, #00a3d1, #0088b0); border-color: transparent;
+}
+.tier-card.highlight .tier-cta:hover { background: linear-gradient(140deg, #0095c0, #00738f); color: #fff; }
+
+.pricing-note { margin-top: 26px; font-size: 15px; color: var(--muted-45); text-align: center; }
+
+.reassurance { margin-top: 30px; display: flex; justify-content: center; gap: 34px; flex-wrap: wrap; font-size: 15px; color: rgba(32, 30, 29, .6); }
+
+.quote-band {
+  margin-top: 56px; display: flex; gap: 36px; align-items: center;
+  background: linear-gradient(160deg, #f2fafd, #fff);
+  border: 1px solid rgba(32, 30, 29, .08); border-radius: 22px; overflow: hidden;
+}
+.quote-band img { width: 240px; height: 280px; object-fit: cover; object-position: 50% 28%; }
+.quote-band .quote-copy { flex: 1; padding: 28px 34px 28px 0; display: flex; flex-direction: column; gap: 12px; }
+.quote-band .quote-text { font-size: 23px; line-height: 1.45; }
+.quote-band .quote-attr { font-size: 15px; color: var(--muted-50); }
+
+.faq { margin-top: 92px; display: flex; flex-direction: column; gap: 24px; }
+.faq h2 { margin: 0; font-size: 30px; letter-spacing: -.02em; font-weight: 400; }
+.faq .faq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 38px 56px; }
+.faq .faq-item { display: flex; flex-direction: column; gap: 8px; }
+.faq .faq-q { font-size: 18px; }
+.faq .faq-a { font-size: 16px; line-height: 1.6; color: var(--muted-58); }
+</style>
+</head>
+<body>
+
+<div style="min-height:100vh;background:#fff">
+
+  <div class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">LegDay</a>
+      <div class="nav-links">
+        <a href="how-it-works.html">How it works</a>
+        <a href="pricing.html" class="active">Pricing</a>
+      </div>
+      <a class="cta" href="app.html">Start free</a>
+    </div>
+  </div>
+
+  <div class="pricing-page">
+    <div class="pricing-hero">
+      <div class="kicker">Pricing</div>
+      <h1>The habit is free. The help costs.</h1>
+      <div class="sub">Streaks, logging, progress and one crew stay free for as long as you use them. Paid tiers add planning, coaching and analysis.</div>
+    </div>
+
+    <div class="free-banner">
+      <div class="free-copy">
+        <div class="free-title">Free</div>
+        <div class="free-sub">Unlimited logging, the streak and its monthly freeze, four-week progress and a crew of three. No trial clock, no card.</div>
+      </div>
+      <a class="outline-pill" href="app.html">Start free</a>
+    </div>
+
+    <div class="tier-grid">
+
+      <div class="tier-card">
+        <div class="tier-head">
+          <div class="tier-name">Basic</div>
+        </div>
+        <div class="tier-price">€3<span> /month</span></div>
+        <div class="tier-blurb">For keeping the habit honest.</div>
+        <div class="tier-rule"></div>
+        <div class="tier-features">
+          <div class="tier-feature"><span class="dot">·</span><span>Full progress history, not four weeks</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Unlimited crews</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Streak freezes: two a month</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>CSV export and Health sync</span></div>
+        </div>
+        <a class="tier-cta" href="app.html">Choose Basic</a>
+      </div>
+
+      <div class="tier-card highlight">
+        <div class="tier-head">
+          <div class="tier-name">Super</div>
+          <div class="tier-badge">Most picked</div>
+        </div>
+        <div class="tier-price">€5<span> /month</span></div>
+        <div class="tier-blurb">For training with a plan behind it.</div>
+        <div class="tier-rule"></div>
+        <div class="tier-features">
+          <div class="tier-feature"><span class="dot">·</span><span>Everything in Basic</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Full workout library and saved routines</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Weekly coach check-in</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Auto-adjusting plan around missed days</span></div>
+        </div>
+        <a class="tier-cta" href="app.html">Start free trial</a>
+      </div>
+
+      <div class="tier-card">
+        <div class="tier-head">
+          <div class="tier-name">Pro</div>
+        </div>
+        <div class="tier-price">€10<span> /month</span></div>
+        <div class="tier-blurb">For anyone chasing a number.</div>
+        <div class="tier-rule"></div>
+        <div class="tier-features">
+          <div class="tier-feature"><span class="dot">·</span><span>Everything in Super</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Lift analysis and 1RM projections</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Programme builder with periodisation</span></div>
+          <div class="tier-feature"><span class="dot">·</span><span>Household plan, up to four people</span></div>
+        </div>
+        <a class="tier-cta" href="app.html">Choose Pro</a>
+      </div>
+
+    </div>
+
+    <div class="pricing-note">Prices in euros, VAT included. Cancel any month — you drop back to Free and keep your history.</div>
+
+    <div class="reassurance">
+      <div>14 days of Super, no card</div>
+      <div>Cancel in two taps</div>
+      <div>Export everything at any tier</div>
+    </div>
+
+    <div class="quote-band">
+      <img src="assets/anika-run.webp" alt="Anika">
+      <div class="quote-copy">
+        <div class="quote-text">“Start on Free. If you are still logging in a month, Super is worth it, and if you are not, no subscription was going to fix that.”</div>
+        <div class="quote-attr">Anika Vester · ambassador</div>
+      </div>
+    </div>
+
+    <div class="faq">
+      <h2>Questions</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-q">Does the free tier expire?</div>
+          <div class="faq-a">No. Logging and the streak are free permanently. Paid tiers are for planning and coaching on top.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I change tier later?</div>
+          <div class="faq-a">Any month, in either direction. Changes take effect at the next billing date and nothing is deleted.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Is there a family or crew price?</div>
+          <div class="faq-a">Pro covers up to four people in one household at the single price.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What happens to my data?</div>
+          <div class="faq-a">It stays yours. Export the full history as CSV at any tier, including Free.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">LegDay · prototype</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>LegDay — Show up today. Then do it again.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  /* — home page — */
+  .hero {
+    padding-top: 104px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .hero-headline { font-size: 64px; line-height: 1.04; letter-spacing: -.03em; font-weight: 400; max-width: 15ch; }
+  .hero-sub { margin-top: 22px; font-size: 20px; line-height: 1.5; color: var(--muted-58); max-width: 44ch; }
+  .hero-note { margin-top: 12px; font-size: 14px; color: var(--muted-42); }
+  .social-proof { margin-top: 26px; display: flex; align-items: center; gap: 12px; }
+  .social-proof .avatars { display: flex; }
+  .social-proof .avatars img {
+    width: 34px; height: 34px; border-radius: 999px; object-fit: cover; border: 2px solid #fff;
+  }
+  .social-proof .avatars img + img { margin-left: -10px; }
+  .social-proof .proof-line { font-size: 15px; color: var(--muted-55); }
+
+  .showcase { margin-top: 64px; }
+  .showcase-panel {
+    border-radius: 28px;
+    background: linear-gradient(160deg, #e4f3fa 0%, #f4fafd 55%, #ffffff 100%);
+    padding: 44px 40px; display: flex; justify-content: center; gap: 26px;
+  }
+  .phone-card {
+    width: 200px; height: 340px; border-radius: 26px; background: #fff;
+    border: 1px solid var(--hairline); box-shadow: 0 12px 40px rgba(0, 60, 80, .09);
+    padding: 18px 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .phone-card.gap-10 { gap: 10px; }
+  .card-label { font-size: 13px; color: var(--muted-45); }
+  .card-session { font-size: 22px; line-height: 1.15; }
+  .card-rule { height: 1px; background: var(--hairline); }
+  .card-streak { font-size: 44px; color: var(--accent); line-height: 1; }
+  .card-streak-label { font-size: 13px; color: var(--muted-45); margin-top: -6px; }
+  .card-entry { font-size: 16px; padding: 10px; border-radius: 12px; background: #f3f8fa; color: var(--muted-50); }
+  .card-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .heat-grid div { height: 20px; border-radius: 4px; }
+  .card-month-label { font-size: 13px; color: var(--muted-45); margin-top: auto; }
+
+  .features { margin-top: 96px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 44px; }
+  .feature { display: flex; flex-direction: column; gap: 10px; }
+  .feature-title { font-size: 22px; letter-spacing: -.01em; }
+  .feature-body { font-size: 16px; line-height: 1.6; color: var(--muted-58); }
+
+  .ambassador-section { margin-top: 104px; }
+  .ambassador { display: flex; gap: 48px; align-items: stretch; }
+  .ambassador-photo { width: 380px; height: 520px; object-fit: cover; object-position: 50% 22%; border-radius: 22px; }
+  .ambassador-copy { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+  .ambassador-eyebrow { font-size: 14px; color: var(--muted-42); }
+  .ambassador-quote { font-size: 34px; line-height: 1.25; letter-spacing: -.02em; max-width: 20ch; }
+  .ambassador-who { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+  .ambassador-name { font-size: 17px; }
+  .ambassador-role { font-size: 15px; color: var(--muted-50); }
+  .ambassador-body { font-size: 17px; line-height: 1.65; color: rgba(32, 30, 29, .6); max-width: 46ch; margin-top: 6px; }
+  .ambassador-copy .cta { align-self: flex-start; margin-top: 10px; }
+
+  .testimonials { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+  .testimonial {
+    border-radius: 20px; overflow: hidden; display: flex;
+    background: linear-gradient(160deg, #f2fafd, #fff); border: 1px solid var(--hairline);
+  }
+  .testimonial img { width: 170px; height: 230px; object-fit: cover; }
+  .testimonial .t-copy { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .testimonial .t-quote { font-size: 19px; line-height: 1.45; }
+  .testimonial .t-who { font-size: 14px; color: var(--muted-45); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 56px; text-align: center; }
+  .stat { display: flex; flex-direction: column; gap: 6px; }
+  .stat-number { font-size: 36px; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 15px; color: var(--muted-55); }
+
+  .pricing-teaser { margin-top: 104px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .pricing-teaser-headline { font-size: 40px; letter-spacing: -.02em; }
+  .pricing-teaser-sub { font-size: 18px; color: var(--muted-58); text-align: center; max-width: 46ch; }
+  .pricing-teaser a.plans-link { font-size: 16px; color: var(--accent); }
+
+  .closer {
+    margin-top: 110px; padding-bottom: 110px;
+    display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;
+  }
+  .closer-headline { font-size: 32px; letter-spacing: -.02em; }
+</style>
+
+<div style="min-height:100vh;background:#fff">
+
+  <div class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html" style="text-decoration:none">LegDay</a>
+      <div class="nav-links">
+        <a href="how-it-works.html">How it works</a>
+        <a href="pricing.html">Pricing</a>
+      </div>
+      <a class="cta" href="app.html">Start free</a>
+    </div>
+  </div>
+
+  <div class="container hero">
+    <div class="hero-headline">Show up today. Then do it again.</div>
+    <div class="hero-sub">A tracker built around the one thing that keeps people going: not breaking the chain.</div>
+    <a class="cta cta-lg" href="app.html" style="margin-top:32px">Start free</a>
+    <div class="hero-note">No card. Two minutes to set up.</div>
+    <div class="social-proof">
+      <div class="avatars">
+        <img src="assets/anika-gym.webp" alt="Anika" style="object-position:50% 18%">
+        <img src="assets/avatar-2.webp" alt="" style="object-position:50% 15%">
+        <img src="assets/anika-run.webp" alt="" style="object-position:50% 22%">
+      </div>
+      <div class="proof-line">4.8 ★ · 12,400 people logged a session today</div>
+    </div>
+  </div>
+
+  <div class="container showcase">
+    <div class="showcase-panel">
+      <div class="phone-card">
+        <div class="card-label">today</div>
+        <div class="card-session">Upper body<br>22 min</div>
+        <div class="card-rule"></div>
+        <div class="card-streak">14</div>
+        <div class="card-streak-label">day streak</div>
+      </div>
+      <div class="phone-card gap-10">
+        <div class="card-label">quick log</div>
+        <div class="card-entry">bench 3×8 60kg</div>
+        <div class="card-chips">
+          <div class="chip">Bench</div>
+          <div class="chip">3 sets</div>
+          <div class="chip">60 kg</div>
+        </div>
+      </div>
+      <div class="phone-card">
+        <div class="card-label">this month</div>
+        <div class="heat-grid">
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#0088b0"></div>
+          <div style="background:#eef2f4"></div>
+          <div style="background:#a9dcec"></div>
+          <div style="background:#0088b0"></div>
+        </div>
+        <div class="card-month-label">18 of 31 days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container features">
+    <div class="feature">
+      <div class="feature-title">The chain, not the numbers</div>
+      <div class="feature-body">One streak, one freeze a month for rest days. Everything else is quieter than it.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-title">Log it in a sentence</div>
+      <div class="feature-body">Type or say what you did. Sets, weights and time get read out of the line.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-title">A crew of three</div>
+      <div class="feature-body">Small groups, not a feed. They see you showed up. That is the whole feature.</div>
+    </div>
+  </div>
+
+  <div class="container ambassador-section">
+    <div class="ambassador">
+      <img class="ambassador-photo" src="assets/anika-portrait.webp" alt="Anika, ambassador">
+      <div class="ambassador-copy">
+        <div class="ambassador-eyebrow">Ambassador</div>
+        <div class="ambassador-quote">“I stopped tracking everything and started tracking whether I showed up. That changed the year.”</div>
+        <div class="ambassador-who">
+          <div class="ambassador-name">Anika Vester</div>
+          <div class="ambassador-role">Coach and social lead · 214-day streak</div>
+        </div>
+        <div class="ambassador-body">“I have coached people who could recite their macros and had not trained in three weeks. LegDay asks one question a day. That is the whole reason it works.”</div>
+        <a class="cta cta-md" href="app.html">Try Anika's routine free</a>
+      </div>
+    </div>
+
+    <div class="testimonials">
+      <div class="testimonial">
+        <img src="assets/tomy.webp" alt="" style="object-position:50% 20%">
+        <div class="t-copy">
+          <div class="t-quote">“Logging takes me one line between sets. I have never once opened it and thought, not now.”</div>
+          <div class="t-who">Tomy · on quick entry</div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <img src="assets/janice.webp" alt="" style="object-position:50% 30%">
+        <div class="t-copy">
+          <div class="t-quote">“The freeze is the honest part. Rest is training, and the app finally treats it that way.”</div>
+          <div class="t-who">Janice · on rest days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">73%</div>
+        <div class="stat-label">still logging after eight weeks</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">9 sec</div>
+        <div class="stat-label">median time to log a session</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">4.8 ★</div>
+        <div class="stat-label">from 3,100 ratings</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container pricing-teaser">
+    <div class="pricing-teaser-headline">Free to stay consistent.</div>
+    <div class="pricing-teaser-sub">The streak, the log and your crew cost nothing. Three paid tiers add coaching, plans and analysis.</div>
+    <a class="plans-link" href="pricing.html">See the plans →</a>
+  </div>
+
+  <div class="container closer">
+    <div class="closer-headline">Day one is the only hard one.</div>
+    <a class="cta cta-lg" href="app.html">Start free</a>
+    <div class="site-footer">LegDay · prototype</div>
+  </div>
+
+</div>
