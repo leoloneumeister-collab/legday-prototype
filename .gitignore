@@ -1,1 +1,9 @@
 .DS_Store
+
+# Jarvis: secrets, local run state, and recorded live payloads never get committed.
+.env
+jarvis/.env
+jarvis/state/
+jarvis/fixtures/live/
+__pycache__/
+*.pyc

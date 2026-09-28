@@ -1,0 +1,60 @@
+{
+  "articles": [
+    {
+      "title": "US widens AI chip export restrictions to cover additional data-center accelerators",
+      "summary": "The Commerce Department expanded license requirements to a broader class of AI accelerators, including parts previously designed to fall under performance thresholds. Analysts estimate the affected markets accounted for a low-double-digit share of recent data-center revenue at the largest US vendors.",
+      "source": "Reuters",
+      "link": "https://example.com/a1",
+      "publishDate": "2026-09-28T06:12:00Z"
+    },
+    {
+      "title": "NVIDIA schedules Q3 earnings for 18 November, guides to continued data-center strength",
+      "summary": "NVIDIA confirmed its next earnings date and reiterated that data-center demand remains supply-constrained rather than demand-constrained.",
+      "source": "CNBC",
+      "link": "https://example.com/a2",
+      "publishDate": "2026-09-28T05:40:00Z"
+    },
+    {
+      "title": "ASML books record order intake as leading-edge lithography demand accelerates",
+      "summary": "ASML reported bookings ahead of consensus, driven by high-NA EUV commitments from two logic customers, and nudged its full-year outlook higher.",
+      "source": "Bloomberg",
+      "link": "https://example.com/a3",
+      "publishDate": "2026-09-28T04:55:00Z"
+    },
+    {
+      "title": "Microsoft raises cloud capex guidance, says AI capacity remains the binding constraint",
+      "summary": "Microsoft told investors capital expenditure will step up again next quarter, with the majority going to AI datacenter capacity.",
+      "source": "The Information",
+      "link": "https://example.com/a4",
+      "publishDate": "2026-09-27T21:10:00Z"
+    },
+    {
+      "title": "Fed holds rates steady, signals patience as inflation drifts sideways",
+      "summary": "The Federal Reserve left policy unchanged and removed language implying near-term cuts, describing progress on inflation as having stalled.",
+      "source": "WSJ",
+      "link": "https://example.com/a5",
+      "publishDate": "2026-09-27T19:00:00Z"
+    },
+    {
+      "title": "Local bakery chain expands to three new towns",
+      "summary": "A regional bakery announced expansion plans funded by a bank loan. No public market exposure.",
+      "source": "Regional Post",
+      "link": "https://example.com/a6",
+      "publishDate": "2026-09-27T12:00:00Z"
+    },
+    {
+      "title": "NVIDIA shares slip 1.2% in premarket trading",
+      "summary": "Shares edged lower in thin premarket volume with no company-specific news.",
+      "source": "MarketBeat",
+      "link": "https://example.com/a7",
+      "publishDate": "2026-09-28T07:02:00Z"
+    },
+    {
+      "title": "Football transfer window closes with record spending",
+      "summary": "Clubs spent a record sum during the summer window.",
+      "source": "Sports Daily",
+      "link": "https://example.com/a8",
+      "publishDate": "2026-09-27T10:00:00Z"
+    }
+  ]
+}

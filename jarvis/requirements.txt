@@ -1,0 +1,2 @@
+# Everything else Jarvis uses is in the Python standard library.
+anthropic>=1.7,<2

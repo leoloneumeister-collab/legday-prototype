@@ -1,0 +1,11 @@
+[
+  {
+    "representative": "Example Member",
+    "ticker": "NVDA",
+    "transaction": "Purchase",
+    "amount": "$15,001 - $50,000",
+    "transactionDate": "2026-09-12",
+    "disclosureDate": "2026-09-24",
+    "chamber": "House"
+  }
+]

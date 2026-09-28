@@ -1,0 +1,86 @@
+[
+  {
+    "instrument": {
+      "ticker": "NVDA_US_EQ",
+      "name": "NVIDIA Corporation",
+      "isin": "US67066G1040",
+      "currency": "USD"
+    },
+    "quantity": 12.4,
+    "averagePricePaid": 118.42,
+    "currentPrice": 174.9,
+    "quantityAvailableForTrading": 12.4,
+    "quantityInPies": 0,
+    "createdAt": "2026-02-11T09:31:02Z",
+    "walletImpact": {
+      "currency": "EUR",
+      "currentValue": 1983.4,
+      "totalCost": 1342.8,
+      "unrealizedProfitLoss": 640.6,
+      "fxImpact": -18.2
+    }
+  },
+  {
+    "instrument": {
+      "ticker": "MSFT_US_EQ",
+      "name": "Microsoft Corporation",
+      "isin": "US5949181045",
+      "currency": "USD"
+    },
+    "quantity": 3.1,
+    "averagePricePaid": 402.15,
+    "currentPrice": 431.6,
+    "quantityAvailableForTrading": 3.1,
+    "quantityInPies": 0,
+    "createdAt": "2026-01-08T10:02:44Z",
+    "walletImpact": {
+      "currency": "EUR",
+      "currentValue": 1224.7,
+      "totalCost": 1141.2,
+      "unrealizedProfitLoss": 83.5,
+      "fxImpact": -9.4
+    }
+  },
+  {
+    "instrument": {
+      "ticker": "ASML_EQ",
+      "name": "ASML Holding NV",
+      "isin": "NL0010273215",
+      "currency": "EUR"
+    },
+    "quantity": 1.0,
+    "averagePricePaid": 712.4,
+    "currentPrice": 689.1,
+    "quantityAvailableForTrading": 1.0,
+    "quantityInPies": 0,
+    "createdAt": "2026-03-19T14:22:10Z",
+    "walletImpact": {
+      "currency": "EUR",
+      "currentValue": 689.1,
+      "totalCost": 712.4,
+      "unrealizedProfitLoss": -23.3,
+      "fxImpact": 0
+    }
+  },
+  {
+    "instrument": {
+      "ticker": "VUAA_EQ",
+      "name": "Vanguard S&P 500 UCITS ETF",
+      "isin": "IE00BFMXXD54",
+      "currency": "EUR"
+    },
+    "quantity": 4.2,
+    "averagePricePaid": 101.8,
+    "currentPrice": 108.35,
+    "quantityAvailableForTrading": 4.2,
+    "quantityInPies": 0,
+    "createdAt": "2025-11-04T08:15:00Z",
+    "walletImpact": {
+      "currency": "EUR",
+      "currentValue": 455.07,
+      "totalCost": 427.56,
+      "unrealizedProfitLoss": 27.51,
+      "fxImpact": 0
+    }
+  }
+]

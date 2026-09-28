@@ -1,0 +1,16 @@
+{
+  "id": 20455512,
+  "currency": "EUR",
+  "totalValue": 4712.27,
+  "cash": {
+    "availableToTrade": 360.0,
+    "inPies": 0.0,
+    "reservedForOrders": 0.0
+  },
+  "investments": {
+    "currentValue": 4352.27,
+    "totalCost": 3623.96,
+    "unrealizedProfitLoss": 728.31,
+    "realizedProfitLoss": 142.08
+  }
+}
