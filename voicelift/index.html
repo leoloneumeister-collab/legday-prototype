@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceLift</title>
+<style>
+  :root {
+    --bg: #0f1115; --card: #181b22; --line: #262a34; --text: #f2f4f8; --mute: #8b93a7;
+    --accent: #ff5a36; --gold: #ffc233; --green: #3ddc97;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, -apple-system, Segoe UI, sans-serif; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -.3px; }
+  .streak { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+  .lvl { display: flex; justify-content: space-between; align-items: baseline; }
+  .lvl b { font-size: 22px; }
+  .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 8px 0 4px; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); width: 0; transition: width .5s; }
+  .bar.goal > i { background: var(--green); }
+  .small { color: var(--mute); font-size: 13px; }
+  .mic-area { text-align: center; padding: 8px 0 4px; }
+  #mic { width: 112px; height: 112px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 44px; cursor: pointer; box-shadow: 0 0 0 0 rgba(255,90,54,.5); transition: transform .1s; }
+  #mic:active { transform: scale(.95); }
+  #mic.on { animation: pulse 1.2s infinite; background: #e0381a; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,90,54,.6); } 100% { box-shadow: 0 0 0 28px rgba(255,90,54,0); } }
+  #heard { min-height: 24px; margin: 12px 0 4px; color: var(--mute); font-style: italic; }
+  .hint { color: var(--mute); font-size: 13px; }
+  form { display: flex; gap: 8px; margin-top: 12px; }
+  input[type=text] { flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
+  button.btn { background: var(--line); color: var(--text); border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 15px; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--mute); margin: 0 0 10px; }
+  .entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); gap: 8px; }
+  .entry:first-of-type { border-top: 0; }
+  .entry .name { font-weight: 600; text-transform: capitalize; }
+  .xp { color: var(--gold); font-weight: 700; white-space: nowrap; }
+  .x { background: none; border: 0; color: var(--mute); cursor: pointer; font-size: 18px; padding: 4px 8px; }
+  .badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .badge { text-align: center; padding: 10px 4px; border-radius: 12px; border: 1px dashed var(--line); opacity: .4; font-size: 12px; }
+  .badge.got { opacity: 1; border: 1px solid var(--gold); background: rgba(255,194,51,.08); }
+  .badge span { display: block; font-size: 26px; }
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px); background: var(--text); color: #111; padding: 12px 18px; border-radius: 12px; font-weight: 600; transition: transform .3s; max-width: 90%; text-align: center; z-index: 5; }
+  #toast.show { transform: translate(-50%, 0); }
+  .empty { color: var(--mute); text-align: center; padding: 12px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏋️ VoiceLift</h1>
+    <div class="streak" id="streak">🔥 0</div>
+  </header>
+
+  <div class="card">
+    <div class="lvl"><b id="lvl">Level 1</b><span class="small" id="xpTxt">0 / 100 XP</span></div>
+    <div class="bar"><i id="xpBar"></i></div>
+    <div class="small" style="margin-top:10px">Daily goal: <span id="goalTxt">0 / 100 XP</span></div>
+    <div class="bar goal"><i id="goalBar"></i></div>
+  </div>
+
+  <div class="card mic-area">
+    <button id="mic" aria-label="Tap and say your exercise">🎤</button>
+    <div id="heard">Tap the mic and say what you did</div>
+    <div class="hint">Try: "3 sets of 10 squats at 80 kilos" · "bench press 5 by 5 at 60" · "plank 2 minutes" · "ran 5 kilometers"</div>
+    <form id="form">
+      <input type="text" id="txt" placeholder="Or type it here" autocomplete="off">
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Today</h2>
+    <div id="today"></div>
+  </div>
+
+  <div class="card">
+    <h2>Badges</h2>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <div class="small" style="text-align:center"><a href="#" id="reset" style="color:var(--mute)">Reset all data</a></div>
+</div>
+<div id="toast"></div>
+
+<script>
+const KEY = 'voicelift.v1';
+const $ = id => document.getElementById(id);
+const dayKey = d => { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+let state = { log: [], badges: [] };
+try { state = Object.assign(state, JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+// ---------- parsing ----------
+const ONES = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19 };
+const TENS = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+function wordsToDigits(s) {
+  const t = s.split(/\s+/); const out = [];
+  for (let i = 0; i < t.length; i++) {
+    const w = t[i];
+    if (w in TENS) {
+      let n = TENS[w];
+      if (t[i + 1] in ONES && ONES[t[i + 1]] < 10 && ONES[t[i + 1]] > 0) { n += ONES[t[i + 1]]; i++; }
+      if (t[i + 1] === 'hundred') { i++; }
+      out.push(n);
+    } else if (w in ONES) {
+      let n = ONES[w];
+      if (t[i + 1] === 'hundred') { n *= 100; i++; if (t[i + 1] in TENS) { n += TENS[t[++i]]; } }
+      out.push(n);
+    } else out.push(w);
+  }
+  return out.join(' ');
+}
+
+function parse(raw) {
+  let s = ' ' + wordsToDigits(raw.toLowerCase().replace(/[,.!?]/g, ' ').replace(/-/g, ' ')) + ' ';
+  const e = { sets: 1, reps: 0, weight: 0, unit: 'kg', secs: 0, dist: 0, distUnit: '' };
+  const cut = re => { const m = s.match(re); if (m) s = s.replace(re, ' '); return m; };
+
+  let m;
+  if ((m = cut(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilos?|kilograms?)\b/))) { e.weight = +m[1]; e.unit = 'kg'; }
+  else if ((m = cut(/(\d+(?:\.\d+)?)\s*(lbs?|pounds?)\b/))) { e.weight = +m[1]; e.unit = 'lb'; }
+
+  if ((m = cut(/(\d+(?:\.\d+)?)\s*(km|kilometers?|kilometres?|k|miles?|mi)\b/))) {
+    e.dist = +m[1]; e.distUnit = /^(mi)/.test(m[2]) ? 'mi' : 'km';
+  }
+  if ((m = cut(/(\d+(?:\.\d+)?)\s*(minutes?|mins?|m)\b/))) e.secs += Math.round(+m[1] * 60);
+  if ((m = cut(/(\d+)\s*(seconds?|secs?|s)\b/))) e.secs += +m[1];
+
+  if ((m = cut(/(\d+)\s*(?:sets?\s*(?:of)?|x|times|by)\s*(\d+)/))) { e.sets = +m[1]; e.reps = +m[2]; }
+  else if ((m = cut(/(\d+)\s*(?:reps?|repetitions?|times)\b/))) e.reps = +m[1];
+  else if ((m = cut(/(\d+)\s*sets?\b/))) e.sets = +m[1];
+
+  // "5 by 5 at 60": leftover number after sets x reps is the weight
+  if (e.reps && !e.weight && (m = s.match(/\b(\d+(?:\.\d+)?)\b/))) { e.weight = +m[1]; s = s.replace(m[0], ' '); }
+  // leading bare number = reps ("10 squats")
+  if (!e.reps && !e.secs && !e.dist && (m = s.match(/^\s*(\d+)\s+(?=[a-z])/))) { e.reps = +m[1]; s = s.replace(m[0], ' '); }
+  // leftover number = reps if we still have none
+  if (!e.reps && !e.secs && !e.dist && (m = s.match(/\b(\d+)\b/))) { e.reps = +m[1]; s = s.replace(m[0], ' '); }
+
+  const filler = /\b(i|did|do|done|just|add|log|track|had|performed|completed|finished|some|of|at|with|using|for|and|then|the|a|an|my|today|set|sets|rep|reps|please|weighing|weight|ran|run|walked|walk|cycled|swam)\b/g;
+  const verbs = (s.match(/\b(ran|run|walked|walk|cycled|swam)\b/) || [])[1];
+  let name = s.replace(filler, ' ').replace(/\s+/g, ' ').trim();
+  if (!name && verbs) name = ({ ran: 'run', walked: 'walk', cycled: 'cycle', swam: 'swim' })[verbs] || verbs;
+  if (!name) return null;
+  if (!e.reps && !e.secs && !e.dist) e.reps = 1;
+  e.name = name;
+  return e;
+}
+
+// ---------- xp ----------
+function xpFor(e) {
+  let xp = e.sets * 10;
+  xp += e.sets * e.reps;
+  if (e.weight) xp += Math.round(e.sets * e.reps * e.weight / (e.unit === 'lb' ? 220 : 100) * 5);
+  xp += Math.round(e.secs / 6);
+  xp += Math.round(e.dist * (e.distUnit === 'mi' ? 25 : 15));
+  return Math.max(5, xp);
+}
+const LEG = /(squat|lunge|deadlift|leg press|leg curl|leg extension|calf|hip thrust|step up|rdl)/;
+const volume = e => e.sets * e.reps * e.weight * (e.unit === 'lb' ? .4536 : 1);
+function describe(e) {
+  const p = [];
+  if (e.reps) p.push(e.sets > 1 ? e.sets + '×' + e.reps : e.reps + ' reps');
+  if (e.weight) p.push(e.weight + e.unit);
+  if (e.secs) p.push(e.secs >= 60 ? (e.secs / 60).toFixed(e.secs % 60 ? 1 : 0) + ' min' : e.secs + ' s');
+  if (e.dist) p.push(e.dist + e.distUnit);
+  return p.join(' · ');
+}
+
+// ---------- gamification ----------
+const BADGES = [
+  { id: 'first', icon: '🌱', name: 'First rep', test: s => s.log.length >= 1 },
+  { id: 'five', icon: '💪', name: '5 exercises', test: s => s.log.length >= 5 },
+  { id: 'leg', icon: '🦵', name: 'Leg day', test: s => s.log.some(e => LEG.test(e.name)) },
+  { id: 'ton', icon: '🏗️', name: '1 ton lifted', test: s => s.log.reduce((a, e) => a + volume(e), 0) >= 1000 },
+  { id: 'streak3', icon: '🔥', name: '3 day streak', test: s => streak() >= 3 },
+  { id: 'goal', icon: '🎯', name: 'Daily goal', test: s => todayXp() >= 100 },
+];
+const totalXp = () => state.log.reduce((a, e) => a + e.xp, 0);
+const todayXp = () => state.log.filter(e => e.day === dayKey()).reduce((a, e) => a + e.xp, 0);
+function levelInfo(xp) { let l = 1, need = 100; while (xp >= need) { xp -= need; l++; need = 100 + (l - 1) * 50; } return { l, xp, need }; }
+function streak() {
+  const days = new Set(state.log.map(e => e.day)); let n = 0; const d = new Date();
+  if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1); // today not done yet doesn't break the streak
+  while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+// ---------- ui ----------
+let toastT;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function render() {
+  const li = levelInfo(totalXp());
+  $('lvl').textContent = 'Level ' + li.l;
+  $('xpTxt').textContent = li.xp + ' / ' + li.need + ' XP';
+  $('xpBar').style.width = (li.xp / li.need * 100) + '%';
+  const t = todayXp();
+  $('goalTxt').textContent = Math.min(t, 100) + ' / 100 XP' + (t >= 100 ? ' ✅' : '');
+  $('goalBar').style.width = Math.min(100, t) + '%';
+  $('streak').textContent = '🔥 ' + streak();
+
+  const today = state.log.filter(e => e.day === dayKey()).reverse();
+  $('today').innerHTML = today.length ? today.map(e =>
+    `<div class="entry"><div><div class="name">${esc(e.name)}</div><div class="small">${esc(describe(e))}</div></div>
+     <div><span class="xp">+${e.xp} XP</span><button class="x" data-id="${e.id}" aria-label="Delete">✕</button></div></div>`).join('')
+    : '<div class="empty">Nothing yet. Say your first exercise.</div>';
+
+  $('badges').innerHTML = BADGES.map(b => `<div class="badge ${state.badges.includes(b.id) ? 'got' : ''}"><span>${b.icon}</span>${b.name}</div>`).join('');
+}
+
+function add(raw) {
+  const e = parse(raw);
+  if (!e) { toast("Didn't catch an exercise. Try again?"); return; }
+  const before = levelInfo(totalXp()).l;
+  e.xp = xpFor(e); e.id = Date.now() + Math.random(); e.day = dayKey(); e.ts = Date.now();
+  state.log.push(e);
+  const fresh = BADGES.filter(b => !state.badges.includes(b.id) && b.test(state));
+  fresh.forEach(b => state.badges.push(b.id));
+  save(); render();
+  let msg = `Logged ${e.name} ${describe(e)} · +${e.xp} XP`;
+  if (levelInfo(totalXp()).l > before) msg = `🎉 LEVEL UP! You're level ${levelInfo(totalXp()).l}`;
+  else if (fresh.length) msg = `${fresh[0].icon} Badge: ${fresh[0].name}!`;
+  toast(msg);
+}
+
+$('today').addEventListener('click', ev => {
+  const id = ev.target.dataset && ev.target.dataset.id; if (!id) return;
+  state.log = state.log.filter(e => String(e.id) !== id);
+  state.badges = state.badges.filter(bid => BADGES.find(b => b.id === bid).test(state));
+  save(); render();
+});
+$('form').addEventListener('submit', ev => { ev.preventDefault(); const v = $('txt').value.trim(); if (v) { add(v); $('txt').value = ''; } });
+$('reset').addEventListener('click', ev => { ev.preventDefault(); if (confirm('Delete all your data?')) { state = { log: [], badges: [] }; save(); render(); } });
+
+// ---------- voice ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const mic = $('mic');
+if (!SR) {
+  mic.disabled = true; mic.style.opacity = .4;
+  $('heard').textContent = 'Voice not supported in this browser. Use Chrome or Safari, or type below.';
+} else {
+  const rec = new SR();
+  rec.lang = navigator.language || 'en-US';
+  rec.interimResults = true; rec.continuous = false;
+  let listening = false, finalText = '';
+  rec.onstart = () => { listening = true; finalText = ''; mic.classList.add('on'); $('heard').textContent = 'Listening…'; };
+  rec.onresult = ev => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const r = ev.results[i];
+      if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+    }
+    $('heard').textContent = '"' + (finalText + interim).trim() + '"';
+  };
+  rec.onerror = ev => {
+    const msgs = { 'not-allowed': 'Mic blocked. Allow microphone access (needs https or localhost).', 'no-speech': "Didn't hear anything.", 'audio-capture': 'No microphone found.' };
+    $('heard').textContent = msgs[ev.error] || 'Voice error: ' + ev.error;
+  };
+  rec.onend = () => {
+    listening = false; mic.classList.remove('on');
+    if (finalText.trim()) add(finalText.trim());
+  };
+  mic.addEventListener('click', () => { try { listening ? rec.stop() : rec.start(); } catch (e) {} });
+}
+
+render();
+</script>
+</body>
+</html>
