@@ -2,274 +2,571 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VoiceLift</title>
-<style>
-  :root {
-    --bg: #0f1115; --card: #181b22; --line: #262a34; --text: #f2f4f8; --mute: #8b93a7;
-    --accent: #ff5a36; --gold: #ffc233; --green: #3ddc97;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 system-ui, -apple-system, Segoe UI, sans-serif; }
-  .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px 60px; }
-  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  h1 { font-size: 20px; margin: 0; letter-spacing: -.3px; }
-  .streak { background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-weight: 600; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
-  .lvl { display: flex; justify-content: space-between; align-items: baseline; }
-  .lvl b { font-size: 22px; }
-  .bar { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 8px 0 4px; }
-  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); width: 0; transition: width .5s; }
-  .bar.goal > i { background: var(--green); }
-  .small { color: var(--mute); font-size: 13px; }
-  .mic-area { text-align: center; padding: 8px 0 4px; }
-  #mic { width: 112px; height: 112px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 44px; cursor: pointer; box-shadow: 0 0 0 0 rgba(255,90,54,.5); transition: transform .1s; }
-  #mic:active { transform: scale(.95); }
-  #mic.on { animation: pulse 1.2s infinite; background: #e0381a; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,90,54,.6); } 100% { box-shadow: 0 0 0 28px rgba(255,90,54,0); } }
-  #heard { min-height: 24px; margin: 12px 0 4px; color: var(--mute); font-style: italic; }
-  .hint { color: var(--mute); font-size: 13px; }
-  form { display: flex; gap: 8px; margin-top: 12px; }
-  input[type=text] { flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
-  button.btn { background: var(--line); color: var(--text); border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 15px; }
-  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--mute); margin: 0 0 10px; }
-  .entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); gap: 8px; }
-  .entry:first-of-type { border-top: 0; }
-  .entry .name { font-weight: 600; text-transform: capitalize; }
-  .xp { color: var(--gold); font-weight: 700; white-space: nowrap; }
-  .x { background: none; border: 0; color: var(--mute); cursor: pointer; font-size: 18px; padding: 4px 8px; }
-  .badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .badge { text-align: center; padding: 10px 4px; border-radius: 12px; border: 1px dashed var(--line); opacity: .4; font-size: 12px; }
-  .badge.got { opacity: 1; border: 1px solid var(--gold); background: rgba(255,194,51,.08); }
-  .badge span { display: block; font-size: 26px; }
-  #toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px); background: var(--text); color: #111; padding: 12px 18px; border-radius: 12px; font-weight: 600; transition: transform .3s; max-width: 90%; text-align: center; z-index: 5; }
-  #toast.show { transform: translate(-50%, 0); }
-  .empty { color: var(--mute); text-align: center; padding: 12px 0; }
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🏋️ VoiceLift</h1>
-    <div class="streak" id="streak">🔥 0</div>
+<title>VoiceLift</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Phone-first gym log: sticky level header, Log/Stats tabs, one input dock pinned to the bottom. */
+  :root {
+    --bg: #0d1117; --surface: #151b24; --surface2: #1d2531; --line: #273143;
+    --text: #e9eef5; --mute: #8996aa;
+    --accent: #5aa9ff; --accent-ink: #06121f; --gold: #f5c04a; --good: #46d39a; --danger: #ff7070;
+    --f-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+    --f-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f3f5f9; --surface: #ffffff; --surface2: #e9eef5; --line: #d8dfea;
+      --text: #101722; --mute: #586579;
+      --accent: #1d6fd6; --accent-ink: #ffffff; --gold: #a06a05; --good: #118a5a; --danger: #c93a3a;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f3f5f9; --surface: #ffffff; --surface2: #e9eef5; --line: #d8dfea;
+    --text: #101722; --mute: #586579;
+    --accent: #1d6fd6; --accent-ink: #ffffff; --gold: #a06a05; --good: #118a5a; --danger: #c93a3a;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 var(--f-body);
+    padding-block: 0 190px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 10; }
+  .app { max-width: 560px; margin: 0 auto; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .num { font-family: var(--f-display); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 12px 0 10px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .brand { font: 700 24px/1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; }
+  .brand span { color: var(--accent); }
+  .chips { display: flex; gap: 8px; align-items: center; }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 4px 11px; font: 600 15px/1.2 var(--f-display); letter-spacing: .04em; white-space: nowrap; }
+  .chip.btn:hover { border-color: var(--accent); }
+  .xpbar { height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 10px 0 2px; }
+  .xpbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width .5s; }
+  .xplbl { display: flex; justify-content: space-between; color: var(--mute); font-size: 12px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-top: 10px; }
+  .tabs button { border: 0; background: none; padding: 8px; border-radius: 9px; font: 700 16px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+
+  .stack { display: flex; flex-direction: column; gap: 12px; padding-top: 6px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
+  h2 { margin: 0 0 10px; font: 700 14px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
+  .banner { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--surface2); border-radius: 12px; padding: 10px 12px; font-size: 14px; color: var(--mute); }
+  .link { background: none; border: 0; color: var(--accent); padding: 4px 0; text-decoration: underline; font-size: 14px; }
+
+  .gh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .gname { font: 700 22px/1.1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; }
+  .gmeta { color: var(--mute); font-size: 13px; }
+  .setrow { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+  .setrow:first-of-type { border-top: 0; }
+  .sn { color: var(--mute); font: 600 15px var(--f-display); }
+  .sv { font: 700 21px/1 var(--f-display); letter-spacing: .02em; }
+  .se { color: var(--mute); font-size: 12px; text-align: right; }
+  .pr { background: var(--gold); color: #1a1200; font: 700 12px/1 var(--f-display); letter-spacing: .08em; padding: 3px 6px; border-radius: 5px; margin-left: 8px; vertical-align: 3px; }
+  .x { background: none; border: 0; color: var(--mute); font-size: 16px; padding: 4px 8px; border-radius: 8px; }
+  .x:hover { color: var(--danger); }
+  .empty { color: var(--mute); }
+  .ex-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .try { background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: 14px; text-align: left; }
+  .try:hover { border-color: var(--accent); }
+
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bg); border-top: 1px solid var(--line);
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .dock-in { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  .rest { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface2); border-radius: 10px; padding: 6px 10px; }
+  .rest .t { font: 700 24px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+  .rest.done .t { color: var(--good); }
+  .mini { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; font-size: 14px; }
+  .quick { display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+  .quick .last { color: var(--mute); font-size: 12px; white-space: nowrap; margin-right: 2px; }
+  .quick .mini { white-space: nowrap; font-weight: 600; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; min-width: 0; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font: 500 16px var(--f-body); }
+  input[type=text]:focus { border-color: var(--accent); outline: none; }
+  .mic, .go { border: 0; border-radius: 12px; width: 52px; flex: none; font-size: 20px; }
+  .mic { background: var(--surface2); border: 1px solid var(--line); }
+  .mic.on { background: var(--danger); color: #fff; animation: pulse 1.1s infinite; }
+  .go { background: var(--accent); color: var(--accent-ink); font: 700 16px var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,112,112,.55); } 100% { box-shadow: 0 0 0 16px rgba(255,112,112,0); } }
+  .heard { color: var(--mute); font-size: 13px; min-height: 18px; }
+
+  #toast { position: fixed; left: 50%; bottom: calc(190px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; max-width: calc(100% - 32px); text-align: center; z-index: 8; transition: all .25s; }
+  #toast.show { transform: translate(-50%, 0); opacity: 1; }
+  #toast.gold { background: var(--gold); color: #1a1200; }
+
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+  .grid4 b { display: block; font: 700 28px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+  .grid4 span { color: var(--mute); font-size: 12px; }
+  .pick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .pick button { border: 1px solid var(--line); background: var(--surface2); border-radius: 99px; padding: 4px 11px; font-size: 13px; }
+  .pick button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  svg.ch { width: 100%; height: auto; display: block; overflow: visible; }
+  .ch text { fill: var(--mute); font: 500 10px var(--f-body); }
+  .ch .grid { stroke: var(--line); stroke-width: 1; }
+  .ch .bar { fill: var(--accent); opacity: .45; }
+  .ch .bar.today { opacity: 1; }
+  .ch .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+  .ch .area { fill: var(--accent); opacity: .12; }
+  .ch .dot { fill: var(--accent); }
+  .ch .dot.pr { fill: var(--gold); }
+  .ch .val { fill: var(--text); font-weight: 600; }
+  .mrow { display: grid; grid-template-columns: 74px 1fr 34px; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
+  .mbar { height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .mbar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .prrow { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .prrow:first-of-type { border-top: 0; }
+  .prrow b { font: 700 18px/1.1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; }
+  .tip { color: var(--mute); font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand">Voice<span>Lift</span></div>
+      <div class="chips">
+        <span class="chip" id="streak">0 day streak</span>
+        <button class="chip btn" id="unit" aria-label="Switch kilograms and pounds">kg</button>
+      </div>
+    </div>
+    <div class="xpbar"><i id="xpbar"></i></div>
+    <div class="xplbl"><span id="lvl">Level 1</span><span id="xptxt">0 / 100 XP</span></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-log" aria-selected="true" data-tab="log">Log</button>
+      <button role="tab" id="tab-stats" aria-selected="false" data-tab="stats">Stats</button>
+    </div>
   </header>
+  <main id="main" class="stack"></main>
+</div>
 
-  <div class="card">
-    <div class="lvl"><b id="lvl">Level 1</b><span class="small" id="xpTxt">0 / 100 XP</span></div>
-    <div class="bar"><i id="xpBar"></i></div>
-    <div class="small" style="margin-top:10px">Daily goal: <span id="goalTxt">0 / 100 XP</span></div>
-    <div class="bar goal"><i id="goalBar"></i></div>
-  </div>
+<div id="toast" role="status"></div>
 
-  <div class="card mic-area">
-    <button id="mic" aria-label="Tap and say your exercise">🎤</button>
-    <div id="heard">Tap the mic and say what you did</div>
-    <div class="hint">Try: "3 sets of 10 squats at 80 kilos" · "bench press 5 by 5 at 60" · "plank 2 minutes" · "ran 5 kilometers"</div>
-    <form id="form">
-      <input type="text" id="txt" placeholder="Or type it here" autocomplete="off">
-      <button class="btn" type="submit">Add</button>
+<div class="dock">
+  <div class="dock-in">
+    <div class="rest" id="rest" hidden>
+      <span class="tip" id="restlbl">Rest</span><span class="t" id="rest-t">1:30</span>
+      <span><button class="mini" data-act="rest+">+15s</button> <button class="mini" data-act="rest-skip">Skip</button></span>
+    </div>
+    <div class="quick" id="quick"></div>
+    <div class="heard" id="heard"></div>
+    <form id="form" autocomplete="off">
+      <button type="button" class="mic" id="mic" aria-label="Dictate with the microphone">&#127908;</button>
+      <input type="text" id="cmd" placeholder="Say it: 3x10 incline press, 24 kilos" enterkeyhint="send" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Exercise to log">
+      <button type="submit" class="go">Log</button>
     </form>
   </div>
-
-  <div class="card">
-    <h2>Today</h2>
-    <div id="today"></div>
-  </div>
-
-  <div class="card">
-    <h2>Badges</h2>
-    <div class="badges" id="badges"></div>
-  </div>
-
-  <div class="small" style="text-align:center"><a href="#" id="reset" style="color:var(--mute)">Reset all data</a></div>
 </div>
-<div id="toast"></div>
 
 <script>
-const KEY = 'voicelift.v1';
-const $ = id => document.getElementById(id);
-const dayKey = d => { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+(function () {
+  var KEY = 'voicelift.v2', LB = 0.45359237;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var dk = function (d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  var addDays = function (n) { var d = new Date(); d.setDate(d.getDate() + n); return d; };
+  var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); };
 
-let state = { log: [], badges: [] };
-try { state = Object.assign(state, JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  var S = { sets: [], unit: 'kg', tab: 'log', seeded: false, pick: '' };
+  try { var r0 = JSON.parse(localStorage.getItem(KEY) || 'null'); if (r0 && Array.isArray(r0.sets)) S = Object.assign(S, r0); } catch (e) {}
+  var save = function () { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
-// ---------- parsing ----------
-const ONES = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19 };
-const TENS = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
-function wordsToDigits(s) {
-  const t = s.split(/\s+/); const out = [];
-  for (let i = 0; i < t.length; i++) {
-    const w = t[i];
-    if (w in TENS) {
-      let n = TENS[w];
-      if (t[i + 1] in ONES && ONES[t[i + 1]] < 10 && ONES[t[i + 1]] > 0) { n += ONES[t[i + 1]]; i++; }
-      if (t[i + 1] === 'hundred') { i++; }
-      out.push(n);
-    } else if (w in ONES) {
-      let n = ONES[w];
-      if (t[i + 1] === 'hundred') { n *= 100; i++; if (t[i + 1] in TENS) { n += TENS[t[++i]]; } }
-      out.push(n);
-    } else out.push(w);
-  }
-  return out.join(' ');
-}
-
-function parse(raw) {
-  let s = ' ' + wordsToDigits(raw.toLowerCase().replace(/[,.!?]/g, ' ').replace(/-/g, ' ')) + ' ';
-  const e = { sets: 1, reps: 0, weight: 0, unit: 'kg', secs: 0, dist: 0, distUnit: '' };
-  const cut = re => { const m = s.match(re); if (m) s = s.replace(re, ' '); return m; };
-
-  let m;
-  if ((m = cut(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilos?|kilograms?)\b/))) { e.weight = +m[1]; e.unit = 'kg'; }
-  else if ((m = cut(/(\d+(?:\.\d+)?)\s*(lbs?|pounds?)\b/))) { e.weight = +m[1]; e.unit = 'lb'; }
-
-  if ((m = cut(/(\d+(?:\.\d+)?)\s*(km|kilometers?|kilometres?|k|miles?|mi)\b/))) {
-    e.dist = +m[1]; e.distUnit = /^(mi)/.test(m[2]) ? 'mi' : 'km';
-  }
-  if ((m = cut(/(\d+(?:\.\d+)?)\s*(minutes?|mins?|m)\b/))) e.secs += Math.round(+m[1] * 60);
-  if ((m = cut(/(\d+)\s*(seconds?|secs?|s)\b/))) e.secs += +m[1];
-
-  if ((m = cut(/(\d+)\s*(?:sets?\s*(?:of)?|x|times|by)\s*(\d+)/))) { e.sets = +m[1]; e.reps = +m[2]; }
-  else if ((m = cut(/(\d+)\s*(?:reps?|repetitions?|times)\b/))) e.reps = +m[1];
-  else if ((m = cut(/(\d+)\s*sets?\b/))) e.sets = +m[1];
-
-  // "5 by 5 at 60": leftover number after sets x reps is the weight
-  if (e.reps && !e.weight && (m = s.match(/\b(\d+(?:\.\d+)?)\b/))) { e.weight = +m[1]; s = s.replace(m[0], ' '); }
-  // leading bare number = reps ("10 squats")
-  if (!e.reps && !e.secs && !e.dist && (m = s.match(/^\s*(\d+)\s+(?=[a-z])/))) { e.reps = +m[1]; s = s.replace(m[0], ' '); }
-  // leftover number = reps if we still have none
-  if (!e.reps && !e.secs && !e.dist && (m = s.match(/\b(\d+)\b/))) { e.reps = +m[1]; s = s.replace(m[0], ' '); }
-
-  const filler = /\b(i|did|do|done|just|add|log|track|had|performed|completed|finished|some|of|at|with|using|for|and|then|the|a|an|my|today|set|sets|rep|reps|please|weighing|weight|ran|run|walked|walk|cycled|swam)\b/g;
-  const verbs = (s.match(/\b(ran|run|walked|walk|cycled|swam)\b/) || [])[1];
-  let name = s.replace(filler, ' ').replace(/\s+/g, ' ').trim();
-  if (!name && verbs) name = ({ ran: 'run', walked: 'walk', cycled: 'cycle', swam: 'swim' })[verbs] || verbs;
-  if (!name) return null;
-  if (!e.reps && !e.secs && !e.dist) e.reps = 1;
-  e.name = name;
-  return e;
-}
-
-// ---------- xp ----------
-function xpFor(e) {
-  let xp = e.sets * 10;
-  xp += e.sets * e.reps;
-  if (e.weight) xp += Math.round(e.sets * e.reps * e.weight / (e.unit === 'lb' ? 220 : 100) * 5);
-  xp += Math.round(e.secs / 6);
-  xp += Math.round(e.dist * (e.distUnit === 'mi' ? 25 : 15));
-  return Math.max(5, xp);
-}
-const LEG = /(squat|lunge|deadlift|leg press|leg curl|leg extension|calf|hip thrust|step up|rdl)/;
-const volume = e => e.sets * e.reps * e.weight * (e.unit === 'lb' ? .4536 : 1);
-function describe(e) {
-  const p = [];
-  if (e.reps) p.push(e.sets > 1 ? e.sets + '×' + e.reps : e.reps + ' reps');
-  if (e.weight) p.push(e.weight + e.unit);
-  if (e.secs) p.push(e.secs >= 60 ? (e.secs / 60).toFixed(e.secs % 60 ? 1 : 0) + ' min' : e.secs + ' s');
-  if (e.dist) p.push(e.dist + e.distUnit);
-  return p.join(' · ');
-}
-
-// ---------- gamification ----------
-const BADGES = [
-  { id: 'first', icon: '🌱', name: 'First rep', test: s => s.log.length >= 1 },
-  { id: 'five', icon: '💪', name: '5 exercises', test: s => s.log.length >= 5 },
-  { id: 'leg', icon: '🦵', name: 'Leg day', test: s => s.log.some(e => LEG.test(e.name)) },
-  { id: 'ton', icon: '🏗️', name: '1 ton lifted', test: s => s.log.reduce((a, e) => a + volume(e), 0) >= 1000 },
-  { id: 'streak3', icon: '🔥', name: '3 day streak', test: s => streak() >= 3 },
-  { id: 'goal', icon: '🎯', name: 'Daily goal', test: s => todayXp() >= 100 },
-];
-const totalXp = () => state.log.reduce((a, e) => a + e.xp, 0);
-const todayXp = () => state.log.filter(e => e.day === dayKey()).reduce((a, e) => a + e.xp, 0);
-function levelInfo(xp) { let l = 1, need = 100; while (xp >= need) { xp -= need; l++; need = 100 + (l - 1) * 50; } return { l, xp, need }; }
-function streak() {
-  const days = new Set(state.log.map(e => e.day)); let n = 0; const d = new Date();
-  if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1); // today not done yet doesn't break the streak
-  while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
-  return n;
-}
-
-// ---------- ui ----------
-let toastT;
-function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); }
-const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-function render() {
-  const li = levelInfo(totalXp());
-  $('lvl').textContent = 'Level ' + li.l;
-  $('xpTxt').textContent = li.xp + ' / ' + li.need + ' XP';
-  $('xpBar').style.width = (li.xp / li.need * 100) + '%';
-  const t = todayXp();
-  $('goalTxt').textContent = Math.min(t, 100) + ' / 100 XP' + (t >= 100 ? ' ✅' : '');
-  $('goalBar').style.width = Math.min(100, t) + '%';
-  $('streak').textContent = '🔥 ' + streak();
-
-  const today = state.log.filter(e => e.day === dayKey()).reverse();
-  $('today').innerHTML = today.length ? today.map(e =>
-    `<div class="entry"><div><div class="name">${esc(e.name)}</div><div class="small">${esc(describe(e))}</div></div>
-     <div><span class="xp">+${e.xp} XP</span><button class="x" data-id="${e.id}" aria-label="Delete">✕</button></div></div>`).join('')
-    : '<div class="empty">Nothing yet. Say your first exercise.</div>';
-
-  $('badges').innerHTML = BADGES.map(b => `<div class="badge ${state.badges.includes(b.id) ? 'got' : ''}"><span>${b.icon}</span>${b.name}</div>`).join('');
-}
-
-function add(raw) {
-  const e = parse(raw);
-  if (!e) { toast("Didn't catch an exercise. Try again?"); return; }
-  const before = levelInfo(totalXp()).l;
-  e.xp = xpFor(e); e.id = Date.now() + Math.random(); e.day = dayKey(); e.ts = Date.now();
-  state.log.push(e);
-  const fresh = BADGES.filter(b => !state.badges.includes(b.id) && b.test(state));
-  fresh.forEach(b => state.badges.push(b.id));
-  save(); render();
-  let msg = `Logged ${e.name} ${describe(e)} · +${e.xp} XP`;
-  if (levelInfo(totalXp()).l > before) msg = `🎉 LEVEL UP! You're level ${levelInfo(totalXp()).l}`;
-  else if (fresh.length) msg = `${fresh[0].icon} Badge: ${fresh[0].name}!`;
-  toast(msg);
-}
-
-$('today').addEventListener('click', ev => {
-  const id = ev.target.dataset && ev.target.dataset.id; if (!id) return;
-  state.log = state.log.filter(e => String(e.id) !== id);
-  state.badges = state.badges.filter(bid => BADGES.find(b => b.id === bid).test(state));
-  save(); render();
-});
-$('form').addEventListener('submit', ev => { ev.preventDefault(); const v = $('txt').value.trim(); if (v) { add(v); $('txt').value = ''; } });
-$('reset').addEventListener('click', ev => { ev.preventDefault(); if (confirm('Delete all your data?')) { state = { log: [], badges: [] }; save(); render(); } });
-
-// ---------- voice ----------
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-const mic = $('mic');
-if (!SR) {
-  mic.disabled = true; mic.style.opacity = .4;
-  $('heard').textContent = 'Voice not supported in this browser. Use Chrome or Safari, or type below.';
-} else {
-  const rec = new SR();
-  rec.lang = navigator.language || 'en-US';
-  rec.interimResults = true; rec.continuous = false;
-  let listening = false, finalText = '';
-  rec.onstart = () => { listening = true; finalText = ''; mic.classList.add('on'); $('heard').textContent = 'Listening…'; };
-  rec.onresult = ev => {
-    let interim = '';
-    for (let i = ev.resultIndex; i < ev.results.length; i++) {
-      const r = ev.results[i];
-      if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+  // ---------- numbers & names ----------
+  var ONES = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+  var TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+  function wordsToDigits(s) {
+    var t = s.split(/\s+/), out = [];
+    for (var i = 0; i < t.length; i++) {
+      var w = t[i], nx = t[i + 1];
+      if (w === 'one' && /^(arm|leg|legged|handed|hand)$/.test(nx || '')) { out.push(w); continue; }
+      if (w in TENS) {
+        var n = TENS[w];
+        if (nx in ONES && ONES[nx] > 0 && ONES[nx] < 10) { n += ONES[nx]; i++; }
+        out.push(n);
+      } else if (w in ONES) {
+        var m = ONES[w];
+        if (nx === 'hundred') { m *= 100; i++; if (t[i + 1] in TENS) { m += TENS[t[++i]]; } }
+        out.push(m);
+      } else out.push(w);
     }
-    $('heard').textContent = '"' + (finalText + interim).trim() + '"';
-  };
-  rec.onerror = ev => {
-    const msgs = { 'not-allowed': 'Mic blocked. Allow microphone access (needs https or localhost).', 'no-speech': "Didn't hear anything.", 'audio-capture': 'No microphone found.' };
-    $('heard').textContent = msgs[ev.error] || 'Voice error: ' + ev.error;
-  };
-  rec.onend = () => {
-    listening = false; mic.classList.remove('on');
-    if (finalText.trim()) add(finalText.trim());
-  };
-  mic.addEventListener('click', () => { try { listening ? rec.stop() : rec.start(); } catch (e) {} });
-}
+    return out.join(' ');
+  }
+  var e1 = function (r) { return r.weight > 0 && r.reps > 0 ? r.weight * (1 + r.reps / 30) : 0; };
+  var nameOf = function (r) { return cap((r.variation ? r.variation + ' ' : '') + r.ex); };
+  var keyOf = function (r) { return nameOf(r).toLowerCase(); };
+  var dispW = function (kg) { var v = S.unit === 'kg' ? kg : kg / LB; return String(Math.round(v * 2) / 2); };
+  var wLabel = function (kg) { return kg > 0 ? dispW(kg) + ' ' + S.unit : 'BW'; };
+  function setLabel(r) {
+    var p = [];
+    if (r.reps) p.push(r.weight > 0 ? wLabel(r.weight) + ' × ' + r.reps : r.reps + ' reps');
+    else if (r.weight > 0) p.push(wLabel(r.weight));
+    if (r.secs) p.push(Math.floor(r.secs / 60) + ':' + String(r.secs % 60).padStart(2, '0'));
+    if (r.dist) p.push(r.dist + ' ' + r.distUnit);
+    return p.join(' · ') || '1 rep';
+  }
 
-render();
+  // ---------- parsing ----------
+  var VARS = /\b(incline|decline|flat|wide grip|close grip|narrow grip|neutral grip|wide|close|narrow|reverse|seated|standing|single arm|one arm|single leg|one leg|dumbbells?|barbell|cable|machine|smith|bulgarian|front|sumo|romanian|paused|tempo|underhand|overhand|hammer|goblet|zercher|hack)\b/g;
+  var FILLER = /\b(i|ive|im|did|do|done|just|add|log|track|had|performed|completed|finished|some|of|at|with|using|for|and|then|the|a|an|my|today|set|sets|rep|reps|please|weighing|weight|hey|ok|okay|so|now|made|make|this|that|it|its|different|position|going|go|to|on|next|kilo|kilos|kg|kgs|pounds|lbs|time|times|x|by|got|was|were|new|more)\b/g;
+  var ALIAS = [[/^bench$/, 'bench press'], [/^(ohp|military press|overhead press)$/, 'shoulder press'], [/^dead$/, 'deadlift'], [/^(pullup|pull up|chin up|chinup)$/, 'pull up'], [/^(pushup|push up)$/, 'push up'], [/^(lat pulldown|pulldown)$/, 'lat pulldown'], [/^(bicep curl|biceps curl)$/, 'curl'], [/^(tricep extension|triceps extension)$/, 'tricep extension'], [/^(sit up|situp)$/, 'sit up']];
+  function sing(w) { if (w === 'abs') return w; if (/(ss|us)$/.test(w)) return w; if (/(ch|sh|x|ss)es$/.test(w)) return w.slice(0, -2); return w.replace(/s$/, ''); }
+
+  function parse(raw) {
+    var s = ' ' + wordsToDigits(raw.toLowerCase().replace(/'/g, '').replace(/[,.!?]/g, ' ').replace(/-/g, ' ')) + ' ';
+    var e = { sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' };
+    var m, hasNum = false;
+    function cut(re) { var x = s.match(re); if (x) { s = s.replace(re, ' '); hasNum = true; } return x; }
+    if ((m = cut(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilos?|kilograms?)\b/))) e.weight = +m[1];
+    else if ((m = cut(/(\d+(?:\.\d+)?)\s*(lbs?|pounds?)\b/))) e.weight = +m[1] * LB;
+    if ((m = cut(/(\d+(?:\.\d+)?)\s*(km|kilometers?|kilometres?|k|miles?|mi)\b/))) { e.dist = +m[1]; e.distUnit = /^mi/.test(m[2]) ? 'mi' : 'km'; }
+    if ((m = cut(/(\d+(?:\.\d+)?)\s*(minutes?|mins?|m)\b/))) e.secs += Math.round(+m[1] * 60);
+    if ((m = cut(/(\d+)\s*(seconds?|secs?|s)\b/))) e.secs += +m[1];
+    if ((m = cut(/(\d+)\s*(?:sets?\s*(?:of)?|x|times|by)\s*(\d+)/))) { e.sets = +m[1]; e.reps = +m[2]; }
+    else if ((m = cut(/(\d+)\s*(?:reps?|repetitions?|times)\b/))) e.reps = +m[1];
+    else if ((m = cut(/(\d+)\s*sets?\b/))) e.sets = +m[1];
+    var unitW = S.unit === 'kg' ? 1 : LB;
+    if (e.reps && !e.weight && (m = s.match(/\b(\d+(?:\.\d+)?)\b/))) { e.weight = +m[1] * unitW; s = s.replace(m[0], ' '); }
+    if (!e.reps && !e.secs && !e.dist && (m = s.match(/^\s*(\d+)\s+(?=[a-z])/))) { e.reps = +m[1]; s = s.replace(m[0], ' '); hasNum = true; }
+    if (!e.reps && !e.secs && !e.dist && (m = s.match(/\b(\d+)\b/))) { if (e.weight) e.reps = +m[1]; else e.reps = +m[1]; s = s.replace(m[0], ' '); hasNum = true; }
+
+    var verb = (s.match(/\b(ran|run|walked|walk|cycled|swam)\b/) || [])[1];
+    var vars = [];
+    s = s.replace(VARS, function (x) { x = x.replace(/dumbbells/, 'dumbbell'); if (vars.indexOf(x) < 0) vars.push(x); return ' '; });
+    var name = s.replace(FILLER, ' ').replace(/\b(ran|run|walked|walk|cycled|swam)\b/g, ' ').replace(/\b\d+(\.\d+)?\b/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!name && verb) name = { ran: 'run', run: 'run', walked: 'walk', walk: 'walk', cycled: 'cycle', swam: 'swim' }[verb];
+    if (name) {
+      var w = name.split(' '); w[w.length - 1] = sing(w[w.length - 1]); name = w.join(' ');
+      if (name === 'rdl') { name = 'deadlift'; if (vars.indexOf('romanian') < 0) vars.push('romanian'); }
+      ALIAS.forEach(function (a) { if (a[0].test(name)) name = a[1]; });
+    }
+    e.name = name; e.variation = vars.join(' ');
+    if (!name && !hasNum && !e.variation) return null;
+    return e;
+  }
+
+  var lastSet = function () { return S.sets.length ? S.sets.slice().sort(function (a, b) { return a.ts - b.ts; }).pop() : null; };
+
+  // Turn a parse into a loggable template, borrowing from the last set when the speaker left things out.
+  function fill(e, last) {
+    var t = { sets: Math.max(1, Math.min(20, e.sets || 1)), reps: e.reps, weight: e.weight, secs: e.secs, dist: e.dist, distUnit: e.distUnit, variation: e.variation };
+    if (e.name) { t.ex = e.name; if (!t.reps && !t.secs && !t.dist) t.reps = 1; return t; }
+    if (!last) return null;
+    t.ex = last.ex; if (!t.variation) t.variation = last.variation;
+    if (!t.reps && !t.secs && !t.dist) { t.reps = last.reps; t.secs = last.secs; t.dist = last.dist; t.distUnit = last.distUnit; }
+    if (!t.weight) t.weight = last.weight;
+    return t;
+  }
+
+  // ---------- scoring ----------
+  var MUSCLE = [[/squat|leg press|lunge|calf|leg curl|leg extension|hip thrust|step up/, 'Legs'], [/deadlift|row|pull up|pulldown|chin up|shrug|face pull/, 'Back'], [/bench|push up|chest|fly|dip/, 'Chest'], [/shoulder|lateral raise|overhead|arnold/, 'Shoulders'], [/\bpress\b/, 'Chest'], [/curl|tricep|skull|pushdown|extension/, 'Arms'], [/plank|crunch|sit up|\babs\b|leg raise|core/, 'Core'], [/\brun\b|walk|cycle|swim|bike/, 'Cardio']];
+  function muscleOf(r) { var k = (r.ex + ' ' + r.variation); for (var i = 0; i < MUSCLE.length; i++) if (MUSCLE[i][0].test(k)) return MUSCLE[i][1]; return 'Other'; }
+  function score(r, prior) {
+    var key = keyOf(r), pr = false;
+    if (r.weight > 0 && r.reps > 0) {
+      var best = prior.filter(function (p) { return keyOf(p) === key; }).reduce(function (a, p) { return Math.max(a, e1(p)); }, 0);
+      pr = best > 0 && e1(r) > best + 0.01;
+    }
+    var vol = r.reps * r.weight;
+    var xp = 10 + Math.min(40, Math.round(vol / 40)) + (r.weight ? 0 : Math.round(Math.min(r.reps, 20) / 2)) + Math.round(r.secs / 10) + Math.round(r.dist * (r.distUnit === 'mi' ? 25 : 15)) + (pr ? 50 : 0);
+    return { xp: xp, pr: pr };
+  }
+  var totalXp = function () { return S.sets.reduce(function (a, s) { return a + (s.xp || 0); }, 0); };
+  function levelInfo(xp) { var l = 1, need = 100; while (xp >= need) { xp -= need; l++; need = 100 + (l - 1) * 60; } return { l: l, xp: xp, need: need }; }
+  function streak() {
+    var days = {}; S.sets.forEach(function (s) { days[s.day] = 1; });
+    var n = 0, d = new Date(); if (!days[dk(d)]) d.setDate(d.getDate() - 1);
+    while (days[dk(d)]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+
+  // ---------- sample week (clearly marked, removable) ----------
+  function demo() {
+    var plan = [
+      [6, [['squat', '', 80, 8, 3], ['leg press', '', 140, 10, 3], ['lunge', 'dumbbell', 16, 10, 2]]],
+      [5, [['bench press', '', 60, 8, 3], ['shoulder press', 'dumbbell', 18, 10, 3], ['dip', '', 0, 10, 3]]],
+      [4, [['deadlift', '', 100, 5, 3], ['row', 'barbell', 60, 8, 3], ['pull up', '', 0, 6, 3]]],
+      [3, [['squat', '', 85, 8, 3], ['leg press', '', 150, 10, 3], ['calf raise', '', 60, 15, 3]]],
+      [2, [['bench press', '', 62.5, 8, 3], ['bench press', 'incline', 50, 10, 2], ['shoulder press', 'dumbbell', 20, 8, 3]]],
+      [1, [['deadlift', '', 105, 5, 3], ['row', 'barbell', 62.5, 8, 3], ['curl', 'dumbbell', 12, 10, 3], ['plank', '', 0, 0, 2, 60]]]
+    ];
+    var out = [], t = 0;
+    plan.forEach(function (p) {
+      var base = new Date(addDays(-p[0])); base.setHours(18, 0, 0, 0);
+      p[1].forEach(function (x) {
+        for (var i = 0; i < x[4]; i++) {
+          var rec = { id: uid(), ts: base.getTime() + (t++) * 90000, day: dk(addDays(-p[0])), ex: x[0], variation: x[1], reps: x[3], weight: x[2], secs: x[5] || 0, dist: 0, distUnit: '', demo: true };
+          var sc = score(rec, out); rec.xp = sc.xp; rec.pr = sc.pr; out.push(rec);
+        }
+      });
+    });
+    return out;
+  }
+  if (!S.seeded && !S.sets.length) { S.sets = demo(); }
+  S.seeded = true; save();
+
+  // ---------- toast, rest timer ----------
+  var toastT;
+  function toast(msg, gold) { var t = $('toast'); t.textContent = msg; t.className = (gold ? 'gold ' : '') + 'show'; clearTimeout(toastT); toastT = setTimeout(function () { t.className = ''; }, 3200); }
+  var restEnd = 0, restTimer = null, restDoneAt = 0;
+  function startRest(sec) { restEnd = Date.now() + sec * 1000; restDoneAt = 0; $('rest').hidden = false; clearInterval(restTimer); restTimer = setInterval(tickRest, 250); tickRest(); }
+  function tickRest() {
+    var left = Math.ceil((restEnd - Date.now()) / 1000), box = $('rest');
+    if (left > 0) { box.classList.remove('done'); $('restlbl').textContent = 'Rest'; $('rest-t').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0'); return; }
+    if (!restDoneAt) { restDoneAt = Date.now(); box.classList.add('done'); $('restlbl').textContent = 'Go'; $('rest-t').textContent = '0:00'; beep(); }
+    if (Date.now() - restDoneAt > 8000) { box.hidden = true; clearInterval(restTimer); }
+  }
+  function beep() {
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+    try { var a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.value = .12; o.start(); o.stop(a.currentTime + .25); } catch (e) {}
+  }
+
+  // ---------- logging ----------
+  function addEntry(t) {
+    var before = levelInfo(totalXp()).l, made = [], prHit = null, base = Date.now();
+    for (var i = 0; i < t.sets; i++) {
+      var rec = { id: uid(), ts: base + i, day: dk(), ex: t.ex, variation: t.variation || '', reps: t.reps, weight: t.weight, secs: t.secs, dist: t.dist, distUnit: t.distUnit };
+      var sc = score(rec, S.sets); rec.xp = sc.xp; rec.pr = sc.pr; if (sc.pr) prHit = rec;
+      S.sets.push(rec); made.push(rec);
+    }
+    save(); render();
+    var gain = made.reduce(function (a, r) { return a + r.xp; }, 0), after = levelInfo(totalXp()).l;
+    if (prHit) toast('New PR on ' + nameOf(prHit) + ': e1RM ' + wLabel(e1(prHit)) + '  +' + gain + ' XP', true);
+    else if (after > before) toast('Level up. You are level ' + after, true);
+    else toast(nameOf(made[0]) + ' ' + setLabel(made[0]) + (t.sets > 1 ? '  ×' + t.sets + ' sets' : '') + '  +' + gain + ' XP');
+    startRest(90);
+  }
+  function undo() {
+    var l = lastSet(); if (!l) { toast('Nothing to undo'); return; }
+    S.sets = S.sets.filter(function (s) { return s.id !== l.id; }); save(); render(); toast('Removed ' + nameOf(l) + ' ' + setLabel(l));
+  }
+
+  // Claude fallback for messy speech. Only runs when the quick parser is unsure and the viewer allowed it.
+  async function aiParse(text) {
+    var sample = null;
+    try { sample = window.claude && window.claude.use ? await window.claude.use('sample') : null; } catch (e) {}
+    if (!sample) return null;
+    var l = lastSet();
+    var prompt = 'You turn dictated gym notes into logged sets. Reply with only a JSON array, one object per distinct exercise entry: ' +
+      '{"exercise":"bench press","variation":"incline","sets":3,"reps":8,"weight":24,"unit":"kg","seconds":0,"distance":0,"distance_unit":""}. ' +
+      'exercise is singular lowercase. Put equipment or angle words (incline, dumbbell, wide grip, romanian) in variation. ' +
+      'If the speaker names no exercise, reuse the previous one. Default unit is ' + S.unit + '. Use 0 for unknown numbers, sets defaults to 1.\n' +
+      'Previous set: ' + (l ? JSON.stringify({ exercise: l.ex, variation: l.variation, reps: l.reps, weight_kg: l.weight }) : 'none') + '\nDictation: "' + text.replace(/"/g, "'") + '"';
+    try {
+      var arr = await sample.json(prompt, { modelTier: 'quick' });
+      if (!Array.isArray(arr)) arr = [arr];
+      return arr.map(function (o) {
+        var u = /lb|pound/i.test(o.unit || '') ? LB : (/kg|kilo/i.test(o.unit || '') ? 1 : (S.unit === 'kg' ? 1 : LB));
+        return { ex: String(o.exercise || '').toLowerCase().trim(), variation: String(o.variation || '').toLowerCase().trim(), sets: Math.max(1, Math.min(20, +o.sets || 1)), reps: Math.max(0, +o.reps || 0), weight: Math.max(0, (+o.weight || 0) * u), secs: Math.max(0, +o.seconds || 0), dist: Math.max(0, +o.distance || 0), distUnit: o.distance_unit || (o.distance ? 'km' : '') };
+      }).filter(function (t) { return t.ex; });
+    } catch (e) { return null; }
+  }
+
+  async function handleText(raw) {
+    var t = raw.trim(); if (!t) return;
+    var low = t.toLowerCase(), last = lastSet();
+    if (/^(undo|scratch that|delete (that|last)|remove (that|last)|cancel that)\b/.test(low)) { undo(); return; }
+    var m = /^(same again|same|again|repeat( that)?|another( one)?|one more|1 more)\b/.exec(low), e;
+    if (m) {
+      if (!last) { toast('Nothing to repeat yet'); return; }
+      var rest = low.slice(m[0].length).trim();
+      e = rest ? parse(rest) : null;
+      addEntry(fill(e || { sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' }, last)); return;
+    }
+    e = parse(t);
+    var fuzzy = !e || (e.name && e.name.split(' ').length > 3) || (!e.name && !last);
+    if (fuzzy) {
+      $('heard').textContent = 'Asking Claude to read that…';
+      var list = await aiParse(t);
+      $('heard').textContent = '';
+      if (list && list.length) { list.forEach(function (x) { if (!x.reps && !x.secs && !x.dist) x.reps = 1; addEntry(x); }); return; }
+    }
+    var tpl = e ? fill(e, last) : null;
+    if (!tpl) { toast("Didn't catch an exercise. Try: bench press 60 kilos 8 reps"); return; }
+    addEntry(tpl);
+  }
+
+  // ---------- render ----------
+  var hasDemo = function () { return S.sets.some(function (s) { return s.demo; }); };
+  var bannerHtml = function () { return hasDemo() ? '<div class="banner"><span>Sample week loaded so the stats have something to show.</span><button class="link" data-act="clear-demo">Clear sample data</button></div>' : ''; };
+
+  function renderHeader() {
+    var li = levelInfo(totalXp());
+    $('lvl').textContent = 'Level ' + li.l; $('xptxt').textContent = li.xp + ' / ' + li.need + ' XP';
+    $('xpbar').style.width = (li.xp / li.need * 100) + '%';
+    var st = streak(); $('streak').textContent = st + ' day streak'; $('unit').textContent = S.unit;
+    document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === S.tab ? 'true' : 'false'); });
+  }
+
+  function renderQuick() {
+    var l = lastSet(), q = $('quick');
+    if (!l) { q.innerHTML = ''; return; }
+    var step = S.unit === 'kg' ? 2.5 : 5;
+    q.innerHTML = '<span class="last">' + esc(nameOf(l)) + ' ' + esc(setLabel(l)) + '</span>' +
+      '<button class="mini" data-act="q-rep">Repeat</button>' +
+      (l.weight > 0 ? '<button class="mini" data-act="q-up">+' + step + '</button><button class="mini" data-act="q-down">−' + step + '</button>' : '') +
+      (l.reps ? '<button class="mini" data-act="q-r+">+1 rep</button>' : '') +
+      '<button class="mini" data-act="q-undo">Undo</button>';
+  }
+
+  function renderLog() {
+    var today = S.sets.filter(function (s) { return s.day === dk(); }), map = {}, groups = [];
+    today.forEach(function (s) { var k = keyOf(s); if (!map[k]) { map[k] = { k: k, name: nameOf(s), sets: [], last: 0 }; groups.push(map[k]); } map[k].sets.push(s); map[k].last = Math.max(map[k].last, s.ts); });
+    groups.sort(function (a, b) { return b.last - a.last; });
+    var html = bannerHtml();
+    if (!groups.length) {
+      html += '<div class="card"><h2>Today</h2><div class="empty">No sets yet. Say or type what you just did, one set or a few at once. Tap an example to try it.</div><div class="ex-list">' +
+        ['3 sets of 10 squats at 80 kilos', 'incline dumbbell press 24 kilos for 8', 'plank 90 seconds', 'ran 5 kilometers'].map(function (x) { return '<button class="try" data-try="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') +
+        '</div></div>';
+    }
+    groups.forEach(function (g) {
+      var prev = S.sets.filter(function (s) { return keyOf(s) === g.k && s.day < dk(); });
+      var prevLine = '';
+      if (prev.length) {
+        var d = prev.reduce(function (a, s) { return s.day > a ? s.day : a; }, ''), ds = prev.filter(function (s) { return s.day === d; });
+        var top = ds.slice().sort(function (a, b) { return (e1(b) || b.reps) - (e1(a) || a.reps); })[0];
+        prevLine = 'Last time ' + setLabel(top) + ' · ' + ds.length + ' sets';
+      }
+      var best = g.sets.reduce(function (a, s) { return Math.max(a, e1(s)); }, 0);
+      html += '<div class="card"><div class="gh"><div class="gname">' + esc(g.name) + '</div><div class="gmeta">' + (best ? 'e1RM ' + wLabel(best) : esc(muscleOf(g.sets[0]))) + '</div></div>' +
+        (prevLine ? '<div class="gmeta" style="margin-bottom:4px">' + esc(prevLine) + '</div>' : '');
+      g.sets.forEach(function (s, i) {
+        html += '<div class="setrow"><span class="sn">' + (i + 1) + '</span><span class="sv">' + esc(setLabel(s)) + (s.pr ? '<span class="pr">PR</span>' : '') + '</span><span class="se">+' + s.xp + ' XP</span><button class="x" data-del="' + s.id + '" aria-label="Delete set">&#10005;</button></div>';
+      });
+      html += '</div>';
+    });
+    return html;
+  }
+
+  function volChart() {
+    var days = [0, 1, 2, 3, 4, 5, 6].map(function (i) { return addDays(i - 6); });
+    var vals = days.map(function (d) { return S.sets.filter(function (s) { return s.day === dk(d); }).reduce(function (a, s) { return a + s.reps * s.weight; }, 0); });
+    var max = Math.max.apply(null, vals.concat([1])), W = 320, H = 130, top = 18, bot = 20, bw = 30, gap = (W - 7 * bw) / 6, svg = '';
+    svg += '<line class="grid" x1="0" x2="' + W + '" y1="' + (H - bot) + '" y2="' + (H - bot) + '"/>';
+    vals.forEach(function (v, i) {
+      var h = v ? Math.max(3, (H - bot - top) * v / max) : 0, x = i * (bw + gap), y = H - bot - h, dv = S.unit === 'kg' ? v : v / LB;
+      if (v) {
+        svg += '<rect class="bar' + (i === 6 ? ' today' : '') + '" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + h + '" rx="4"/>';
+        svg += '<text class="val" x="' + (x + bw / 2) + '" y="' + (y - 4) + '" text-anchor="middle">' + (dv >= 1000 ? (dv / 1000).toFixed(1) + 'k' : Math.round(dv)) + '</text>';
+      }
+      svg += '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + days[i].toLocaleDateString('en', { weekday: 'narrow' }) + '</text>';
+    });
+    return '<svg class="ch" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Training volume per day, last 7 days">' + svg + '</svg>';
+  }
+
+  function lineChart(key) {
+    var byDay = {};
+    S.sets.forEach(function (s) { if (keyOf(s) === key && e1(s)) byDay[s.day] = Math.max(byDay[s.day] || 0, e1(s)); });
+    var days = Object.keys(byDay).sort().slice(-10);
+    if (!days.length) return '<div class="empty">No weighted sets for this lift yet.</div>';
+    var v = days.map(function (d) { return S.unit === 'kg' ? byDay[d] : byDay[d] / LB; });
+    var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
+    if (hi - lo < 4) { lo -= 2; hi += 2; } else { var p = (hi - lo) * .12; lo -= p; hi += p; }
+    var W = 320, H = 150, L = 34, R = 12, T = 16, B = 22, xs = function (i) { return v.length === 1 ? (L + W - R) / 2 : L + (W - L - R) * i / (v.length - 1); }, ys = function (x) { return T + (H - T - B) * (1 - (x - lo) / (hi - lo)); };
+    var svg = '', run = 0, pts = '';
+    [lo, hi].forEach(function (g) { svg += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + ys(g) + '" y2="' + ys(g) + '"/><text x="' + (L - 6) + '" y="' + (ys(g) + 3) + '" text-anchor="end">' + Math.round(g) + '</text>'; });
+    v.forEach(function (x, i) { pts += (i ? ' L' : 'M') + xs(i) + ' ' + ys(x); });
+    if (v.length > 1) svg += '<path class="area" d="' + pts + ' L' + xs(v.length - 1) + ' ' + (H - B) + ' L' + xs(0) + ' ' + (H - B) + ' Z"/><path class="line" d="' + pts + '"/>';
+    v.forEach(function (x, i) {
+      var isPr = i > 0 && x > run + 0.01; run = Math.max(run, x);
+      svg += '<circle class="dot' + (isPr ? ' pr' : '') + '" cx="' + xs(i) + '" cy="' + ys(x) + '" r="' + (i === v.length - 1 ? 5 : 3.5) + '"/>';
+    });
+    svg += '<text class="val" x="' + xs(v.length - 1) + '" y="' + (ys(v[v.length - 1]) - 10) + '" text-anchor="' + (v.length > 1 ? 'end' : 'middle') + '">' + Math.round(v[v.length - 1]) + ' ' + S.unit + '</text>';
+    var fmt = function (d) { return new Date(d + 'T12:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric' }); };
+    svg += '<text x="' + xs(0) + '" y="' + (H - 6) + '" text-anchor="' + (v.length > 1 ? 'start' : 'middle') + '">' + fmt(days[0]) + '</text>';
+    if (v.length > 1) svg += '<text x="' + xs(v.length - 1) + '" y="' + (H - 6) + '" text-anchor="end">' + fmt(days[days.length - 1]) + '</text>';
+    return '<svg class="ch" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Estimated one rep max over time">' + svg + '</svg>';
+  }
+
+  function renderStats() {
+    var week = S.sets.filter(function (s) { return s.day >= dk(addDays(-6)); });
+    var vol = week.reduce(function (a, s) { return a + s.reps * s.weight; }, 0), dv = S.unit === 'kg' ? vol : vol / LB;
+    var sess = {}; week.forEach(function (s) { sess[s.day] = 1; });
+    var prs = week.filter(function (s) { return s.pr; }).length;
+    var html = bannerHtml();
+    html += '<div class="card"><h2>Last 7 days</h2><div class="grid4"><div><b>' + Object.keys(sess).length + '</b><span>sessions</span></div><div><b>' + week.length + '</b><span>sets</span></div><div><b>' + (dv >= 1000 ? (dv / 1000).toFixed(1) + 'k' : Math.round(dv)) + '</b><span>' + S.unit + ' lifted</span></div><div><b>' + prs + '</b><span>PRs</span></div></div></div>';
+    html += '<div class="card"><h2>Volume per day (' + S.unit + ')</h2>' + volChart() + '</div>';
+
+    var counts = {}; S.sets.forEach(function (s) { if (e1(s)) { var k = keyOf(s); counts[k] = counts[k] || { n: 0, days: {} }; counts[k].n++; counts[k].days[s.day] = 1; } });
+    var keys = Object.keys(counts).sort(function (a, b) { return Object.keys(counts[b].days).length - Object.keys(counts[a].days).length || counts[b].n - counts[a].n; });
+    if (keys.length) {
+      if (keys.indexOf(S.pick) < 0) S.pick = keys[0];
+      html += '<div class="card"><h2>Estimated 1RM progress (' + S.unit + ')</h2><div class="pick">' + keys.slice(0, 6).map(function (k) { return '<button data-pick="' + esc(k) + '" aria-pressed="' + (k === S.pick) + '">' + esc(cap(k)) + '</button>'; }).join('') + '</div>' + lineChart(S.pick) + '<div class="tip">Gold dots are new records. Estimate uses weight × (1 + reps ÷ 30).</div></div>';
+    }
+    var mus = {}; week.forEach(function (s) { var g = muscleOf(s); mus[g] = (mus[g] || 0) + 1; });
+    var ml = Object.keys(mus).sort(function (a, b) { return mus[b] - mus[a]; }), mm = Math.max.apply(null, ml.map(function (k) { return mus[k]; }).concat([1]));
+    if (ml.length) html += '<div class="card"><h2>Sets by muscle group</h2>' + ml.map(function (k) { return '<div class="mrow"><span>' + k + '</span><div class="mbar"><i style="width:' + (mus[k] / mm * 100) + '%"></i></div><span class="num" style="text-align:right">' + mus[k] + '</span></div>'; }).join('') + '</div>';
+
+    var best = {};
+    S.sets.forEach(function (s) { if (e1(s)) { var k = keyOf(s); if (!best[k] || e1(s) > e1(best[k])) best[k] = s; } });
+    var bk = Object.keys(best).sort(function (a, b) { return e1(best[b]) - e1(best[a]); }).slice(0, 6);
+    if (bk.length) html += '<div class="card"><h2>Personal records</h2>' + bk.map(function (k) { var s = best[k]; return '<div class="prrow"><b>' + esc(nameOf(s)) + '</b><span class="num" style="font-size:18px">' + esc(setLabel(s)) + '</span></div>'; }).join('') + '</div>';
+
+    html += '<div class="card"><h2>Data</h2><div style="display:flex;gap:16px;flex-wrap:wrap"><button class="link" data-act="reset">Delete all my data</button></div><div class="tip" id="resetnote"></div></div>';
+    return html;
+  }
+
+  function render() { renderHeader(); renderQuick(); $('main').innerHTML = S.tab === 'log' ? renderLog() : renderStats(); }
+
+  // ---------- events ----------
+  var resetArmed = false;
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('button'); if (!el) return;
+    var l = lastSet(), step = S.unit === 'kg' ? 2.5 : 5 * LB;
+    if (el.dataset.tab) { S.tab = el.dataset.tab; save(); render(); window.scrollTo(0, 0); return; }
+    if (el.dataset.try) { handleText(el.dataset.try); return; }
+    if (el.dataset.pick) { S.pick = el.dataset.pick; save(); render(); return; }
+    if (el.dataset.del) { S.sets = S.sets.filter(function (s) { return s.id !== el.dataset.del; }); save(); render(); return; }
+    switch (el.dataset.act) {
+      case 'q-rep': if (l) addEntry(fill({ sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' }, l)); break;
+      case 'q-up': if (l) { var a = fill({ sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' }, l); a.weight = l.weight + step; addEntry(a); } break;
+      case 'q-down': if (l) { var b = fill({ sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' }, l); b.weight = Math.max(0, l.weight - step); addEntry(b); } break;
+      case 'q-r+': if (l) { var c = fill({ sets: 1, reps: 0, weight: 0, secs: 0, dist: 0, distUnit: '', name: '', variation: '' }, l); c.reps = l.reps + 1; addEntry(c); } break;
+      case 'q-undo': undo(); break;
+      case 'rest+': restEnd = Math.max(restEnd, Date.now()) + 15000; restDoneAt = 0; $('rest').hidden = false; clearInterval(restTimer); restTimer = setInterval(tickRest, 250); tickRest(); break;
+      case 'rest-skip': $('rest').hidden = true; clearInterval(restTimer); break;
+      case 'clear-demo': S.sets = S.sets.filter(function (s) { return !s.demo; }); save(); render(); toast('Sample data cleared'); break;
+      case 'reset':
+        if (!resetArmed) { resetArmed = true; el.textContent = 'Tap again to delete everything'; setTimeout(function () { resetArmed = false; render(); }, 4000); }
+        else { S.sets = []; resetArmed = false; save(); render(); toast('All data deleted'); }
+        break;
+    }
+  });
+  $('unit').addEventListener('click', function () { S.unit = S.unit === 'kg' ? 'lb' : 'kg'; save(); render(); });
+  $('form').addEventListener('submit', function (ev) { ev.preventDefault(); var v = $('cmd').value; $('cmd').value = ''; handleText(v); });
+
+  // ---------- voice ----------
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, mic = $('mic'), listening = false, rec = null, finalText = '', blocked = false;
+  function micTip() { $('heard').textContent = 'Mic access is blocked here. Tap the mic key on your phone keyboard to dictate into the box.'; mic.style.opacity = .5; }
+  if (!SR) { blocked = true; mic.style.opacity = .5; $('heard').textContent = 'Tip: tap the mic key on your keyboard to dictate.'; }
+  else {
+    rec = new SR(); rec.lang = navigator.language || 'en-US'; rec.interimResults = true; rec.continuous = false;
+    rec.onstart = function () { listening = true; finalText = ''; mic.classList.add('on'); $('heard').textContent = 'Listening…'; };
+    rec.onresult = function (ev) { var interim = ''; for (var i = ev.resultIndex; i < ev.results.length; i++) { var x = ev.results[i]; if (x.isFinal) finalText += x[0].transcript; else interim += x[0].transcript; } $('heard').textContent = '"' + (finalText + interim).trim() + '"'; };
+    rec.onerror = function (ev) { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { blocked = true; micTip(); } else if (ev.error === 'no-speech') $('heard').textContent = "Didn't hear anything."; else $('heard').textContent = 'Voice error: ' + ev.error; };
+    rec.onend = function () { listening = false; mic.classList.remove('on'); if (finalText.trim()) { var t = finalText.trim(); $('heard').textContent = ''; handleText(t); } };
+  }
+  mic.addEventListener('click', function () {
+    if (blocked || !rec) { micTip(); $('cmd').focus(); return; }
+    try { listening ? rec.stop() : rec.start(); } catch (e) { blocked = true; micTip(); }
+  });
+
+  render();
+})();
 </script>
+
 </body>
 </html>
